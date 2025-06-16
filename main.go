@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 
-	"CLB-go-rest/location"
+	"CLB-go-rest/book"
 	"CLB-go-rest/product"
 )
 
@@ -45,7 +45,7 @@ func main() {
 	v1 := app.Group("/api/v1")
 
 	product.RegisterRoutes(v1.Group("/products"))
-	location.RegisterRoutes((v1.Group("/locations")))
+	book.RegisterRoutes(v1.Group("/books"))
 
 	PORT := os.Getenv("PORT")
 	log.Printf("Listening on port : %s", PORT)
