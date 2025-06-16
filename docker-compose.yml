@@ -1,0 +1,9 @@
+services:
+  go:
+    build: .
+    container_name: go-rest
+    ports:
+      - 5000:5000
+    volumes:
+      - .:/app
+      - /app/tmp
