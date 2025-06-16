@@ -12,6 +12,13 @@ import (
 	"CLB-go-rest/product"
 )
 
+type (
+	GlobalErrorHandlerResp struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}
+)
+
 func main() {
 
 	err := godotenv.Load(".env")
@@ -19,7 +26,14 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Status(fiber.StatusBadRequest).JSON(GlobalErrorHandlerResp{
+				Success: false,
+				Message: err.Error(),
+			})
+		},
+	})
 
 	app.Use(recover.New())
 
@@ -29,9 +43,7 @@ func main() {
 
 	v1 := app.Group("/api/v1")
 
-	productRoute := v1.Group("/products")
-	productRoute.Get("", product.GetProducts)
-	productRoute.Get(":id", product.GetProduct)
+	product.RegisterRoutes(v1.Group("/products"))
 
 	PORT := os.Getenv("PORT")
 	log.Printf("Listening on port : %s", PORT)
