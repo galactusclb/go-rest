@@ -2,32 +2,38 @@ package main
 
 import (
 	"log"
-	"fmt"
 	"net/http"
+	"os"
 
-	"github.com/gorilla/mux"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/joho/godotenv"
 
 	"CLB-go-rest/product"
-
 )
 
-func handler(w http.ResponseWriter, r *http.Request){
-	// http.handler('/')
-	fmt.Fprintf(w, "hello Test 3\n")
-}
+func main() {
 
-func main(){
-	
-	r := mux.NewRouter()
- 
-	r.HandleFunc("/", handler)
-	api := r.PathPrefix("/api/v1").Subrouter()
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	productRouter := api.PathPrefix("/products").Subrouter()
-	productRouter.HandleFunc("", product.GetProducts).Methods(http.MethodGet)
-	productRouter.HandleFunc("/{id}", product.GetProduct).Methods(http.MethodGet)
-	productRouter.HandleFunc("", product.CreateProduct).Methods(http.MethodPost)
+	app := fiber.New()
 
-	log.Println("Listening on port 5000...")
-	log.Fatal(http.ListenAndServe(":5000", r))
+	app.Use(recover.New())
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Status(http.StatusOK).SendString("Welcome to Product API")
+	})
+
+	v1 := app.Group("/api/v1")
+
+	productRoute := v1.Group("/products")
+	productRoute.Get("", product.GetProducts)
+	productRoute.Get(":id", product.GetProduct)
+
+	PORT := os.Getenv("PORT")
+	log.Printf("Listening on port : %s", PORT)
+	log.Fatal(app.Listen(":" + PORT))
 }
