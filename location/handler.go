@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+
+	"CLB-go-rest/utils"
 )
 
 type (
@@ -48,28 +50,7 @@ func GetLocations(c *fiber.Ctx) error {
 		})
 	}
 
-	responseObj := GeneratePaginationObj(data, page, limit)
+	responseObj := utils.GeneratePaginationObj(data, page, limit)
 
 	return c.Status(fiber.StatusOK).JSON(responseObj)
-}
-
-func GeneratePaginationObj[T any](data []T, page int, limit int) fiber.Map {
-	nextPage := page + 1
-
-	responseObj := fiber.Map{
-		"data": &data,
-		"meta": fiber.Map{
-			"page":     page,
-			"limit":    limit,
-			"nextPage": nextPage,
-		},
-	}
-
-	if page > 1 {
-		if meta, ok := responseObj["meta"].(fiber.Map); ok {
-			meta["prevPage"] = page - 1
-		}
-	}
-
-	return responseObj
 }

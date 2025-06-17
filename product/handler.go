@@ -6,7 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"CLB-go-rest/validation"
+	"CLB-go-rest/utils"
 )
 
 type (
@@ -44,7 +44,7 @@ func CreateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid Body"})
 	}
 
-	productValidation := validation.NewValidator()
+	productValidation := utils.NewValidator()
 	errors := productValidation.Validate(newProduct)
 	if len(errors) > 0 {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(errors)
