@@ -2,6 +2,7 @@ package location
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,8 +19,20 @@ type (
 )
 
 func GetLocations(c *fiber.Ctx) error {
+	page := c.QueryInt("page")
+	limit := c.QueryInt("limit")
 
-	response, err := http.Get("https://api.escuelajs.co/api/v1/locations")
+	if page <= 0 {
+		page = 1
+	}
+
+	if limit <= 0 {
+		limit = 3
+	}
+
+	url := fmt.Sprintf("https://api.escuelajs.co/api/v1/locations?page=%d&size=%d", page, limit)
+
+	response, err := http.Get(url)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch data",
@@ -35,5 +48,22 @@ func GetLocations(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(data)
+	nextPage := page + 1
+
+	responseObj := fiber.Map{
+		"data": data,
+		"meta": fiber.Map{
+			"page":     page,
+			"limit":    limit,
+			"nextPage": nextPage,
+		},
+	}
+
+	if page > 1 {
+		if meta, ok := responseObj["meta"].(fiber.Map); ok {
+			meta["prevPage"] = page - 1
+		}
+	}
+
+	return c.Status(fiber.StatusOK).JSON(responseObj)
 }
