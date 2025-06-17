@@ -48,10 +48,16 @@ func GetLocations(c *fiber.Ctx) error {
 		})
 	}
 
+	responseObj := GeneratePaginationObj(data, page, limit)
+
+	return c.Status(fiber.StatusOK).JSON(responseObj)
+}
+
+func GeneratePaginationObj[T any](data []T, page int, limit int) fiber.Map {
 	nextPage := page + 1
 
 	responseObj := fiber.Map{
-		"data": data,
+		"data": &data,
 		"meta": fiber.Map{
 			"page":     page,
 			"limit":    limit,
@@ -65,5 +71,5 @@ func GetLocations(c *fiber.Ctx) error {
 		}
 	}
 
-	return c.Status(fiber.StatusOK).JSON(responseObj)
+	return responseObj
 }
